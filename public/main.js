@@ -107,7 +107,7 @@ const store = {
 
   state: {
     // will be unpaused in init()
-    paused: true,
+    paused: false,
     soundEnabled: false,
     menuOpen: false,
     openHelpTopic: null,
@@ -116,12 +116,12 @@ const store = {
     // at render time, and parsing on change.
     config: {
       quality: String(IS_HIGH_END_DEVICE ? QUALITY_HIGH : QUALITY_NORMAL), // will be mirrored to a global variable named `quality` in `configDidUpdate`, for perf.
-      shell: "Random",
+      shell: "HeartName",
       size: IS_DESKTOP
         ? "3" // Desktop default
         : IS_HEADER
-        ? "1.2" // Profile header default (doesn't need to be an int)
-        : "2", // Mobile default
+          ? "1.2" // Profile header default (doesn't need to be an int)
+          : "2", // Mobile default
       autoLaunch: true,
       finale: false,
       skyLighting: SKY_LIGHT_NORMAL + "",
@@ -200,7 +200,7 @@ const store = {
           skyLighting: config.skyLighting,
           scaleFactor: config.scaleFactor,
         },
-      })
+      }),
     );
   },
 };
@@ -404,7 +404,7 @@ function renderApp(state) {
   appNodes.soundBtnSVG.setAttribute("xlink:href", soundBtnIcon);
   appNodes.controls.classList.toggle(
     "hide",
-    state.menuOpen || state.config.hideControls
+    state.menuOpen || state.config.hideControls,
   );
   appNodes.canvasContainer.classList.toggle("blur", state.menuOpen);
   appNodes.menu.classList.toggle("hide", !state.menuOpen);
@@ -470,20 +470,20 @@ appNodes.quality.addEventListener("input", updateConfigNoEvent);
 appNodes.shellType.addEventListener("input", updateConfigNoEvent);
 appNodes.shellSize.addEventListener("input", updateConfigNoEvent);
 appNodes.autoLaunch.addEventListener("click", () =>
-  setTimeout(updateConfig, 0)
+  setTimeout(updateConfig, 0),
 );
 appNodes.finaleMode.addEventListener("click", () =>
-  setTimeout(updateConfig, 0)
+  setTimeout(updateConfig, 0),
 );
 appNodes.skyLighting.addEventListener("input", updateConfigNoEvent);
 appNodes.longExposure.addEventListener("click", () =>
-  setTimeout(updateConfig, 0)
+  setTimeout(updateConfig, 0),
 );
 appNodes.hideControls.addEventListener("click", () =>
-  setTimeout(updateConfig, 0)
+  setTimeout(updateConfig, 0),
 );
 appNodes.fullscreen.addEventListener("click", () =>
-  setTimeout(toggleFullscreen, 0)
+  setTimeout(toggleFullscreen, 0),
 );
 // Changing scaleFactor requires triggering resize handling code as well.
 appNodes.scaleFactor.addEventListener("input", () => {
@@ -697,8 +697,8 @@ const floralShell = (size = 1) => ({
     Math.random() < 0.65
       ? "random"
       : Math.random() < 0.15
-      ? randomColor()
-      : [randomColor(), randomColor({ notSame: true })],
+        ? randomColor()
+        : [randomColor(), randomColor({ notSame: true })],
   floral: true,
 });
 
@@ -758,6 +758,40 @@ const horsetailShell = (size = 1) => {
   };
 };
 
+const heartShell = (size = 1) => {
+  const color = Math.random() < 0.7 ? COLOR.Red : randomColor();
+  return {
+    shellSize: size,
+    heart: true,
+    color,
+    spreadSize: 280 + size * 90,
+    starDensity: 1.2,
+    starLife: 1200 + size * 200,
+    glitter: Math.random() < 0.3 ? "light" : "",
+    glitterColor: COLOR.White,
+    pistil: Math.random() < 0.4,
+    pistilColor: makePistilColor(color),
+  };
+};
+
+const heartNameShell = (size = 1) => {
+  const heartColor = Math.random() < 0.8 ? COLOR.Red : COLOR.Purple;
+  const textColor = Math.random() < 0.6 ? COLOR.White : COLOR.Gold;
+
+  return {
+    shellSize: size,
+    heartName: true,
+    color: heartColor,
+    textColor: textColor,
+    textContent: store.state.config.customText || "LOVE",
+    spreadSize: 320 + size * 100,
+    starDensity: 1.0,
+    starLife: 1400 + size * 220,
+    glitter: Math.random() < 0.4 ? "light" : "",
+    glitterColor: COLOR.White,
+  };
+};
+
 function randomShellName() {
   return Math.random() < 0.5
     ? "Crysanthemum"
@@ -798,6 +832,8 @@ const shellTypes = {
   "Falling Leaves": fallingLeavesShell,
   Floral: floralShell,
   Ghost: ghostShell,
+  Heart: heartShell,
+  HeartName: heartNameShell,
   "Horse Tail": horsetailShell,
   Palm: palmShell,
   Ring: ringShell,
@@ -817,20 +853,20 @@ function init() {
     node.innerHTML = options.reduce(
       (acc, opt) =>
         (acc += `<option value="${opt.value}">${opt.label}</option>`),
-      ""
+      "",
     );
   }
 
   // shell type
   let options = "";
   shellNames.forEach(
-    (opt) => (options += `<option value="${opt}">${opt}</option>`)
+    (opt) => (options += `<option value="${opt}">${opt}</option>`),
   );
   appNodes.shellType.innerHTML = options;
   // shell size
   options = "";
   ['3"', '4"', '6"', '8"', '12"', '16"'].forEach(
-    (opt, i) => (options += `<option value="${i}">${opt}</option>`)
+    (opt, i) => (options += `<option value="${i}">${opt}</option>`),
   );
   appNodes.shellSize.innerHTML = options;
 
@@ -852,7 +888,7 @@ function init() {
     [0.5, 0.62, 0.75, 0.9, 1.0, 1.5, 2.0].map((value) => ({
       value: value.toFixed(2),
       label: `${value * 100}%`,
-    }))
+    })),
   );
 
   // Begin simulation
@@ -905,7 +941,7 @@ function launchShellFromConfig(event) {
 
   shell.launch(
     event ? event.x / w : getRandomShellPositionH(),
-    event ? 1 - event.y / h : getRandomShellPositionV()
+    event ? 1 - event.y / h : getRandomShellPositionV(),
   );
 }
 
@@ -1325,7 +1361,7 @@ function update(frameTime, lag) {
               Math.random() * PI_2,
               Math.random() * star.sparkSpeed * burnRate,
               star.sparkLife * 0.8 +
-                Math.random() * star.sparkLifeVariation * star.sparkLife
+                Math.random() * star.sparkLifeVariation * star.sparkLife,
             );
           }
         }
@@ -1409,7 +1445,7 @@ function render(speed) {
       0,
       bf.x,
       bf.y,
-      bf.radius
+      bf.radius,
     );
     burstGradient.addColorStop(0.024, "rgba(255, 255, 255, 1)");
     burstGradient.addColorStop(0.125, "rgba(255, 160, 20, 0.2)");
@@ -1420,7 +1456,7 @@ function render(speed) {
       bf.x - bf.radius,
       bf.y - bf.radius,
       bf.radius * 2,
-      bf.radius * 2
+      bf.radius * 2,
     );
 
     BurstFlash.returnInstance(bf);
@@ -1474,7 +1510,7 @@ function render(speed) {
       0,
       height - speedBarHeight,
       width * simSpeed,
-      speedBarHeight
+      speedBarHeight,
     );
     mainCtx.globalAlpha = 1;
   }
@@ -1516,7 +1552,7 @@ function colorSky(speed) {
     1,
     targetSkyColor.r,
     targetSkyColor.g,
-    targetSkyColor.b
+    targetSkyColor.b,
   );
   // Scale all color components to a max of `maxSkySaturation`, and apply intensity.
   targetSkyColor.r =
@@ -1549,7 +1585,7 @@ function createParticleArc(
   arcLength,
   count,
   randomness,
-  particleFactory
+  particleFactory,
 ) {
   const angleDelta = arcLength / count;
   // Sometimes there is an extra particle at the end, too close to the start. Subtracting half the angleDelta ensures that is skipped.
@@ -1628,7 +1664,7 @@ function crossetteEffect(star) {
       star.color,
       angle,
       Math.random() * 0.6 + 0.75,
-      600
+      600,
     );
   });
 }
@@ -1645,7 +1681,7 @@ function floralEffect(star) {
       speedMult * 2.4,
       1000 + Math.random() * 300,
       star.speedX,
-      star.speedY
+      star.speedY,
     );
   });
   // Queue burst flash render
@@ -1664,7 +1700,7 @@ function fallingLeavesEffect(star) {
       speedMult * 2.4,
       2400 + Math.random() * 600,
       star.speedX,
-      star.speedY
+      star.speedY,
     );
 
     newStar.sparkColor = COLOR.Gold;
@@ -1689,7 +1725,7 @@ function crackleEffect(star) {
       angle,
       // apply near cubic falloff to speed (places more particles towards outside)
       Math.pow(Math.random(), 0.45) * 2.4,
-      300 + Math.random() * 200
+      300 + Math.random() * 200,
     );
   });
 }
@@ -1756,7 +1792,7 @@ class Shell {
       Math.PI,
       launchVelocity * (this.horsetail ? 1.2 : 1),
       // Hang time is derived linearly from Vi; exact number came from testing
-      launchVelocity * (this.horsetail ? 100 : 400)
+      launchVelocity * (this.horsetail ? 100 : 400),
     ));
 
     // making comet "heavy" limits air drag
@@ -1786,6 +1822,105 @@ class Shell {
     comet.onDeath = (comet) => this.burst(comet.x, comet.y);
 
     soundManager.playSound("lift");
+  }
+
+  getHeartPattern() {
+    const points = [];
+    const scale = 0.8 + this.shellSize * 0.2;
+
+    // Heart shape using parametric equations (corrected orientation)
+    for (let t = 0; t < PI_2; t += 0.1) {
+      const x = 16 * Math.pow(Math.sin(t), 3) * scale * 0.02;
+      const y =
+        (13 * Math.cos(t) -
+          5 * Math.cos(2 * t) -
+          2 * Math.cos(3 * t) -
+          Math.cos(4 * t)) *
+        scale *
+        0.02;
+      points.push({ x, y });
+    }
+
+    return points;
+  }
+
+  getHeartNamePattern() {
+    const points = [];
+    const scale = 0.8 + this.shellSize * 0.2;
+
+    // Heart outline points
+    for (let t = 0; t < PI_2; t += 0.2) {
+      const x = 16 * Math.pow(Math.sin(t), 3) * scale * 0.02;
+      const y =
+        (13 * Math.cos(t) -
+          5 * Math.cos(2 * t) -
+          2 * Math.cos(3 * t) -
+          Math.cos(4 * t)) *
+        scale *
+        0.02;
+      points.push({ x, y, type: "heart" });
+    }
+
+    // Custom text coordinates - you can modify these coordinates
+    const textScale = scale * 0.02;
+    const customTextPoints = [
+      // Example: Simple "LOVE" pattern - modify these coordinates as needed
+      // [-6, 2],
+      // [-6, 1],
+      // [-6, 0],
+      // [-6, -1],
+      // [-6, -2],
+      // [-5, -2],
+      // [-4, -2], // L
+      // [-2, 1],
+      // [-2, 0],
+      // [-2, -1],
+      // [-1, 2],
+      // [-1, -2],
+      // [0, 2],
+      // [0, -2],
+      // [1, 1],
+      // [1, 0],
+      // [1, -1], // O
+      // [3, 2],
+      // [3, 1],
+      // [3, 0],
+      // [4, -1],
+      // [5, 2],
+      // [5, 1],
+      // [5, 0], // V
+      // [7, 2],
+      // [7, 1],
+      // [7, 0],
+      // [7, -1],
+      // [7, -2],
+      // [8, 2],
+      // [8, 0],
+      // [8, -2],
+      // [9, 2],
+      // [9, 0],
+      // [9, -2], //
+      [0, 0],
+      [0, 1],
+      [0, 2],
+      [0, 3],
+      [0, 4],
+      [1, 2],
+      [2, 2],
+      [3, 2],
+      [4, 0],
+      [4, 1],
+      [4, 2],
+      [4, 3],
+    ];
+
+    customTextPoints.forEach(([px, py]) => {
+      const x = px * textScale;
+      const y = py * textScale;
+      points.push({ x, y, type: "text" });
+    });
+
+    return points;
   }
 
   burst(x, y) {
@@ -1868,7 +2003,9 @@ class Shell {
         // add minor variation to star life
         this.starLife + Math.random() * this.starLife * this.starLifeVariation,
         this.horsetail ? this.comet && this.comet.speedX : 0,
-        this.horsetail ? this.comet && this.comet.speedY : -standardInitialSpeed
+        this.horsetail
+          ? this.comet && this.comet.speedY
+          : -standardInitialSpeed,
       );
 
       if (this.secondColor) {
@@ -1928,10 +2065,64 @@ class Shell {
             newSpeed, //speed,
             // add minor variation to star life
             this.starLife +
-              Math.random() * this.starLife * this.starLifeVariation
+              Math.random() * this.starLife * this.starLifeVariation,
           );
 
           if (this.glitter) {
+            star.sparkFreq = sparkFreq;
+            star.sparkSpeed = sparkSpeed;
+            star.sparkLife = sparkLife;
+            star.sparkLifeVariation = sparkLifeVariation;
+            star.sparkColor = this.glitterColor;
+            star.sparkTimer = Math.random() * star.sparkFreq;
+          }
+        });
+      }
+      // Heart shape pattern
+      else if (this.heart) {
+        const heartPoints = this.getHeartPattern();
+        heartPoints.forEach(({ x: px, y: py }) => {
+          const angle = MyMath.pointAngle(0, 0, px, py);
+          const distance = MyMath.pointDist(0, 0, px, py) * speed;
+          const star = Star.add(
+            x,
+            y,
+            color,
+            angle,
+            distance,
+            this.starLife +
+              Math.random() * this.starLife * this.starLifeVariation,
+          );
+
+          if (this.glitter) {
+            star.sparkFreq = sparkFreq;
+            star.sparkSpeed = sparkSpeed;
+            star.sparkLife = sparkLife;
+            star.sparkLifeVariation = sparkLifeVariation;
+            star.sparkColor = this.glitterColor;
+            star.sparkTimer = Math.random() * star.sparkFreq;
+          }
+        });
+      }
+      // HeartName pattern - heart with text inside
+      else if (this.heartName) {
+        const heartNamePoints = this.getHeartNamePattern();
+        heartNamePoints.forEach(({ x: px, y: py, type }) => {
+          const angle = MyMath.pointAngle(0, 0, px, py);
+          const distance = MyMath.pointDist(0, 0, px, py) * speed;
+          const pointColor = type === "text" ? this.textColor : color;
+
+          const star = Star.add(
+            x,
+            y,
+            pointColor,
+            angle,
+            distance,
+            this.starLife +
+              Math.random() * this.starLife * this.starLifeVariation,
+          );
+
+          if (this.glitter && type === "heart") {
             star.sparkFreq = sparkFreq;
             star.sparkSpeed = sparkSpeed;
             star.sparkLife = sparkLife;
@@ -1964,7 +2155,7 @@ class Shell {
     } else {
       throw new Error(
         "Invalid shell color. Expected string or array of strings, but got: " +
-          this.color
+          this.color,
       );
     }
 
@@ -2009,7 +2200,7 @@ class Shell {
       const maxDiff = 2;
       const sizeDifferenceFromMaxSize = Math.min(
         maxDiff,
-        shellSizeSelector() - this.shellSize
+        shellSizeSelector() - this.shellSize,
       );
       const soundScale = (1 - sizeDifferenceFromMaxSize / maxDiff) * 0.3 + 0.7;
       soundManager.playSound("burst", soundScale);
@@ -2211,7 +2402,7 @@ const soundManager = {
             (data) =>
               new Promise((resolve) => {
                 this.ctx.decodeAudioData(data, resolve);
-              })
+              }),
           );
 
         filePromises.push(promise);
@@ -2286,7 +2477,7 @@ const soundManager = {
     const initialVolume = source.volume;
     const initialPlaybackRate = MyMath.random(
       source.playbackRateMin,
-      source.playbackRateMax
+      source.playbackRateMax,
     );
 
     // Volume descreases with scale.
