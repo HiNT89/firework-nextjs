@@ -1,1 +1,5 @@
 @import "tailwindcss";
+
+.check {
+  border: 1px solid red;
+}
