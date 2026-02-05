@@ -148,7 +148,7 @@ class Shell {
     for (let t = 0; t < PI_2; t += 0.1) {
       const x = 16 * Math.pow(Math.sin(t), 3) * scale * 0.02;
       const y =
-        (13 * Math.cos(t) -
+        -(13 * Math.cos(t) -
           5 * Math.cos(2 * t) -
           2 * Math.cos(3 * t) -
           Math.cos(4 * t)) *
@@ -167,7 +167,7 @@ class Shell {
     for (let t = 0; t < PI_2; t += 0.2) {
       const x = 16 * Math.pow(Math.sin(t), 3) * scale * 0.02;
       const y =
-        (13 * Math.cos(t) -
+        -(13 * Math.cos(t) -
           5 * Math.cos(2 * t) -
           2 * Math.cos(3 * t) -
           Math.cos(4 * t)) *
