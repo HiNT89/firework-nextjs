@@ -171,7 +171,7 @@ class Shell {
     // Heart outline - collect points and calculate center
     let minY = Infinity;
     let maxY = -Infinity;
-    
+
     for (let t = 0; t < PI_2; t += 0.2) {
       const x = 16 * Math.pow(Math.sin(t), 3) * scaleFactor;
       const y =
@@ -181,7 +181,7 @@ class Shell {
           2 * Math.cos(3 * t) -
           Math.cos(4 * t)
         ) * scaleFactor;
-      
+
       minY = Math.min(minY, y);
       maxY = Math.max(maxY, y);
       points.push({ x, y, type: "heart" });
@@ -194,7 +194,7 @@ class Shell {
     const textContent = this.textContent || "LOVE";
     const textScale = scale * 0.015;
     const textPoints = getTextPoints(textContent, textScale, 0, heartCenterY);
-    
+
     textPoints.forEach((point) => {
       points.push({ x: point.x, y: point.y, type: "text" });
     });
