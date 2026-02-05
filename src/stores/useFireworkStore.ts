@@ -112,7 +112,7 @@ export const useFireworkStore = create<FireworkState>()(
         quality: String(
           APP_CONFIG.IS_HIGH_END_DEVICE ? QUALITY_HIGH : QUALITY_NORMAL,
         ),
-        shell: "HeartName" as ShellName,
+        shell: "Random" as ShellName,
         size: getDefaultShellSize(),
         autoLaunch: true,
         finale: false,
@@ -216,8 +216,24 @@ export const useFireworkStore = create<FireworkState>()(
           size: state.config.size,
           skyLighting: state.config.skyLighting,
           scaleFactor: state.config.scaleFactor,
+          shell: state.config.shell,
+          autoLaunch: state.config.autoLaunch,
+          finale: state.config.finale,
+          hideControls: state.config.hideControls,
+          longExposure: state.config.longExposure,
+          customText: state.config.customText,
         },
       }),
+      merge: (persistedState, currentState) => {
+        const persisted = persistedState as Partial<FireworkState>;
+        return {
+          ...currentState,
+          config: {
+            ...currentState.config,
+            ...(persisted?.config || {}),
+          },
+        };
+      },
     },
   ),
 );

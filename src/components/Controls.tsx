@@ -38,7 +38,7 @@ const Controls = () => {
   const togglePause = useFireworkStore((state) => state.togglePause);
   const toggleSound = useFireworkStore((state) => state.toggleSound);
   const updateConfig = useFireworkStore((state) => state.updateConfig);
-
+  console.log("config ===>", config);
   const showModal = useCallback(() => {
     setIsModalOpen(true);
   }, []);
