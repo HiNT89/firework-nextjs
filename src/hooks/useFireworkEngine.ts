@@ -13,6 +13,7 @@ import {
   SKY_LIGHT_NONE,
   APP_CONFIG,
 } from "@/config";
+import { getTextPoints } from "@/config/alphabet";
 import { useFireworkStore } from "@/stores/useFireworkStore";
 import { Star, Spark, BurstFlash, Stage, StarInstance } from "@/core/particles";
 import { soundManager } from "@/core/soundManager";
@@ -148,10 +149,12 @@ class Shell {
     for (let t = 0; t < PI_2; t += 0.1) {
       const x = 16 * Math.pow(Math.sin(t), 3) * scale * 0.02;
       const y =
-        -(13 * Math.cos(t) -
+        -(
+          13 * Math.cos(t) -
           5 * Math.cos(2 * t) -
           2 * Math.cos(3 * t) -
-          Math.cos(4 * t)) *
+          Math.cos(4 * t)
+        ) *
         scale *
         0.02;
       points.push({ x, y });
@@ -163,39 +166,37 @@ class Shell {
   getHeartNamePattern() {
     const points: { x: number; y: number; type: string }[] = [];
     const scale = 0.8 + this.shellSize * 0.2;
+    const scaleFactor = scale * 0.02;
 
+    // Heart outline - collect points and calculate center
+    let minY = Infinity;
+    let maxY = -Infinity;
+    
     for (let t = 0; t < PI_2; t += 0.2) {
-      const x = 16 * Math.pow(Math.sin(t), 3) * scale * 0.02;
+      const x = 16 * Math.pow(Math.sin(t), 3) * scaleFactor;
       const y =
-        -(13 * Math.cos(t) -
+        -(
+          13 * Math.cos(t) -
           5 * Math.cos(2 * t) -
           2 * Math.cos(3 * t) -
-          Math.cos(4 * t)) *
-        scale *
-        0.02;
+          Math.cos(4 * t)
+        ) * scaleFactor;
+      
+      minY = Math.min(minY, y);
+      maxY = Math.max(maxY, y);
       points.push({ x, y, type: "heart" });
     }
 
-    const textScale = scale * 0.02;
-    const customTextPoints = [
-      [0, 0],
-      [0, 1],
-      [0, 2],
-      [0, 3],
-      [0, 4],
-      [1, 2],
-      [2, 2],
-      [3, 2],
-      [4, 0],
-      [4, 1],
-      [4, 2],
-      [4, 3],
-    ];
+    // Calculate heart center (geometric center of bounding box)
+    const heartCenterY = (minY + maxY) / 2;
 
-    customTextPoints.forEach(([px, py]) => {
-      const x = px * textScale;
-      const y = py * textScale;
-      points.push({ x, y, type: "text" });
+    // Text from config using alphabet map - centered on heart
+    const textContent = this.textContent || "LOVE";
+    const textScale = scale * 0.015;
+    const textPoints = getTextPoints(textContent, textScale, 0, heartCenterY);
+    
+    textPoints.forEach((point) => {
+      points.push({ x: point.x, y: point.y, type: "text" });
     });
 
     return points;
