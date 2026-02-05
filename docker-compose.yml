@@ -1,0 +1,17 @@
+services:
+  frontend-firework:
+    container_name: frontend-firework
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3007:3000"
+    environment:
+      - PORT=3000
+    restart: unless-stopped
+    networks:
+      - frontend-network
+
+networks:
+  frontend-network:
+    driver: bridge

@@ -1,36 +1,116 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🎆 Firework Next.js
 
-## Getting Started
+A beautiful interactive fireworks simulation built with Next.js, React 19, and Canvas API.
 
-First, run the development server:
+## ✨ Features
+
+- 🎨 Multiple firework shell types (Crysanthemum, Heart, Ring, Palm, etc.)
+- 🎛️ Customizable settings (quality, size, sky lighting, scale)
+- 🔊 Sound effects
+- 📱 Responsive design
+- ⌨️ Keyboard shortcuts (P: Pause, O: Menu, Esc: Close menu)
+
+## 🐳 Run with Docker
+
+### Prerequisites
+
+- [Docker](https://docs.docker.com/get-docker/) installed
+- [Docker Compose](https://docs.docker.com/compose/install/) installed
+
+### Quick Start
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# Clone the repository
+git clone <repository-url>
+cd firework-nextjs
+
+# Build and run with Docker Compose
+docker-compose up frontend-firework --build -d
+
+# Or build and run manually
+docker build -t firework-nextjs .
+docker run -p 3005:3000 firework-nextjs
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Access the Application
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Open your browser and navigate to: **http://localhost:3007**
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Docker Commands
 
-## Learn More
+```bash
+# Start the container
+docker-compose up -d
 
-To learn more about Next.js, take a look at the following resources:
+# Stop the container
+docker-compose down
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Rebuild and start (after code changes)
+docker-compose up -d --build
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# View logs
+docker-compose logs -f
 
-## Deploy on Vercel
+# Check container status
+docker-compose ps
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 💻 Local Development
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Prerequisites
+
+- Node.js 20+
+- npm or yarn
+
+### Installation
+
+```bash
+# Install dependencies
+npm install
+
+# Run development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Start production server
+npm start
+```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## 🛠️ Tech Stack
+
+- **Framework:** Next.js 16
+- **UI Library:** React 19
+- **State Management:** Zustand
+- **Styling:** Tailwind CSS, Sass
+- **UI Components:** Ant Design
+- **Icons:** Font Awesome
+
+## 📁 Project Structure
+
+```
+firework-nextjs/
+├── app/                    # Next.js app directory
+│   ├── layout.tsx
+│   ├── page.tsx
+│   └── globals.css
+├── src/
+│   ├── components/         # React components
+│   ├── config/             # Configuration constants
+│   ├── core/               # Core engine (particles, sound)
+│   ├── helper/             # Shell definitions
+│   ├── hooks/              # Custom React hooks
+│   ├── stores/             # Zustand stores
+│   └── utils/              # Utility functions
+├── public/                 # Static assets
+├── Dockerfile
+├── docker-compose.yml
+└── package.json
+```
+
+## 📜 License
+
+MIT License
