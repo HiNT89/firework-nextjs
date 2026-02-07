@@ -46,6 +46,9 @@ const TIMING_CONFIG = {
   fireworkCycleStart: 0, // Bắt đầu cycle sau (ms)
   fireworkCycleEnd: 45000, // Kết thúc cycle sau (ms) - 45 seconds
   fireworkChangeInterval: 3000, // Đổi effect mỗi (ms) - 3 seconds
+
+  // Thời gian hiển thị HeartName sau khi nhập tên (ms)
+  heartNameDuration: 17000, // 17 seconds (15-20s range)
 };
 
 // Danh sách các loại pháo hoa để cycle
@@ -388,13 +391,21 @@ const HappyNewYear = () => {
   // Handle form submit
   const handleSubmit = () => {
     if (userName.trim()) {
-      // Đổi firework thành HeartName với tên user + bật Finale Mode
+      // Đổi firework thành HeartName với tên user (chưa bật Finale Mode)
       updateConfig({
         shell: "HeartName",
         customText: userName.toUpperCase(),
-        finale: true, // Bật Finale Mode cho pháo hoa hoành tráng
+        finale: false, // Chưa bật Finale Mode
       });
       setStep(1);
+
+      // Sau 15-20s, chuyển sang Random + bật Finale Mode
+      setTimeout(() => {
+        updateConfig({
+          shell: "Random",
+          finale: true, // Bật Finale Mode cho pháo hoa hoành tráng
+        });
+      }, TIMING_CONFIG.heartNameDuration);
     }
   };
 

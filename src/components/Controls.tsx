@@ -103,19 +103,28 @@ const Controls = () => {
         onOk={handleOk}
         onCancel={handleCancel}
         footer={null}
-        width={400}
+        width="90%"
+        style={{ maxWidth: 400 }}
+        styles={{
+          body: {
+            maxHeight: "calc(100vh - 200px)",
+            overflowY: "auto",
+            padding: "16px",
+          },
+        }}
+        centered
       >
-        <div className="space-y-4">
+        <div className="space-y-3 md:space-y-4">
           {/* Shell Type */}
-          <div className="form-option">
+          <div className="form-option flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2">
             <label
-              className="block text-sm font-medium mb-1 cursor-help"
+              className="text-sm font-medium cursor-help shrink-0"
               onClick={() => showHelp("shellType")}
             >
               Shell Type
             </label>
             <select
-              className="w-full p-2 border rounded bg-white text-black"
+              className="w-full sm:w-40 p-2 text-sm border rounded bg-white text-black"
               value={config.shell}
               onChange={(e) => updateConfig({ shell: e.target.value as any })}
             >
@@ -128,15 +137,15 @@ const Controls = () => {
           </div>
 
           {/* Shell Size */}
-          <div className="form-option">
+          <div className="form-option flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2">
             <label
-              className="block text-sm font-medium mb-1 cursor-help"
+              className="text-sm font-medium cursor-help shrink-0"
               onClick={() => showHelp("shellSize")}
             >
               Shell Size
             </label>
             <select
-              className="w-full p-2 border rounded bg-white text-black"
+              className="w-full sm:w-40 p-2 text-sm border rounded bg-white text-black"
               value={config.size}
               onChange={(e) => updateConfig({ size: e.target.value })}
             >
@@ -149,15 +158,15 @@ const Controls = () => {
           </div>
 
           {/* Quality */}
-          <div className="form-option">
+          <div className="form-option flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2">
             <label
-              className="block text-sm font-medium mb-1 cursor-help"
+              className="text-sm font-medium cursor-help shrink-0"
               onClick={() => showHelp("quality")}
             >
               Quality
             </label>
             <select
-              className="w-full p-2 border rounded bg-white text-black"
+              className="w-full sm:w-40 p-2 text-sm border rounded bg-white text-black"
               value={config.quality}
               onChange={(e) => updateConfig({ quality: e.target.value })}
             >
@@ -168,15 +177,15 @@ const Controls = () => {
           </div>
 
           {/* Sky Lighting */}
-          <div className="form-option">
+          <div className="form-option flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2">
             <label
-              className="block text-sm font-medium mb-1 cursor-help"
+              className="text-sm font-medium cursor-help shrink-0"
               onClick={() => showHelp("skyLighting")}
             >
               Sky Lighting
             </label>
             <select
-              className="w-full p-2 border rounded bg-white text-black"
+              className="w-full sm:w-40 p-2 text-sm border rounded bg-white text-black"
               value={config.skyLighting}
               onChange={(e) => updateConfig({ skyLighting: e.target.value })}
             >
@@ -187,15 +196,15 @@ const Controls = () => {
           </div>
 
           {/* Scale Factor */}
-          <div className="form-option">
+          <div className="form-option flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2">
             <label
-              className="block text-sm font-medium mb-1 cursor-help"
+              className="text-sm font-medium cursor-help shrink-0"
               onClick={() => showHelp("scaleFactor")}
             >
               Scale
             </label>
             <select
-              className="w-full p-2 border rounded bg-white text-black"
+              className="w-full sm:w-40 p-2 text-sm border rounded bg-white text-black"
               value={config.scaleFactor.toFixed(2)}
               onChange={(e) =>
                 updateConfig({ scaleFactor: parseFloat(e.target.value) })
@@ -278,16 +287,15 @@ const Controls = () => {
           </div>
 
           {/* Custom Text */}
-          <div className="form-option">
-            <label className="block text-sm font-medium mb-1">
-              Custom Text (for HeartName)
-            </label>
+          <div className="form-option flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2">
+            <label className="text-sm font-medium shrink-0">Custom Text</label>
             <input
               type="text"
-              className="w-full p-2 border rounded bg-white text-black"
+              className="w-full sm:w-40 p-2 text-sm border rounded bg-white text-black"
               value={config.customText}
               onChange={(e) => updateConfig({ customText: e.target.value })}
               maxLength={10}
+              placeholder="HeartName text"
             />
           </div>
         </div>
