@@ -1,10 +1,329 @@
 "use client";
-import React, { useRef, useEffect } from "react";
-import Controls from "@/components/Controls";
+import React, { useState, useRef, useEffect, useMemo } from "react";
+import { motion, AnimatePresence } from "motion/react";
+import { Input, Radio, Button } from "antd";
+import {
+  GiftOutlined,
+  HeartFilled,
+  StarFilled,
+  SmileFilled,
+} from "@ant-design/icons";
 import { useFireworkEngine } from "@/hooks/useFireworkEngine";
 import { useFireworkStore } from "@/stores/useFireworkStore";
+import { apiUserService } from "@/api/apiUserService";
 
-const Page = () => {
+// Danh sách câu chúc Tết theo giới tính
+const WISHES_MALE = [
+  "Chúc anh năm mới thành công rực rỡ! 🎆",
+  "Chúc anh năm mới vạn sự như ý! 🧧",
+  "Chúc anh năm mới phát tài phát lộc! 💰",
+  "Chúc anh năm mới sức khỏe dồi dào! 💪",
+  "Chúc anh năm mới công thành danh toại! 🏆",
+];
+
+const WISHES_FEMALE = [
+  "Chúc chị năm mới xinh đẹp rạng ngời! 🌸",
+  "Chúc chị năm mới hạnh phúc viên mãn! 💖",
+  "Chúc chị năm mới may mắn an lành! 🍀",
+  "Chúc chị năm mới tươi trẻ như xuân! 🌺",
+  "Chúc chị năm mới mọi điều tốt đẹp! ✨",
+];
+
+const SPACIAL_WISHES = [
+  "Chúc LOVE một năm mới tràn đầy yêu thương và hạnh phúc! ❤️🎉",
+  "Hãy vui vẻ lên nhé, LOVE! Năm mới an khang thịnh vượng! 🥳🧧",
+  "Chúc LOVE luôn rạng rỡ và thành công trong năm mới! 🌟💖",
+];
+
+// ==================== TIMING CONFIG ====================
+// Có thể tùy chỉnh thời gian ở đây
+const TIMING_CONFIG = {
+  // Thời gian box xuất hiện (ms)
+  boxAppearDelay: 30000, // 30 seconds
+
+  // Animation lời chúc
+  wishDuration: 15, // Thời gian mỗi lời chúc bay lên (seconds) - tăng lên để chậm hơn
+  wishDelayBetween: 2, // Delay giữa các lời chúc (seconds)
+
+  // Animation lì xì
+  luckyMoneyDuration: 3, // Thời gian lì xì bay lên (seconds)
+
+  // Firework effects cycle (trong 30-45s đầu)
+  fireworkCycleEnabled: true, // Bật/tắt cycle pháo hoa
+  fireworkCycleStart: 0, // Bắt đầu cycle sau (ms)
+  fireworkCycleEnd: 45000, // Kết thúc cycle sau (ms) - 45 seconds
+  fireworkChangeInterval: 3000, // Đổi effect mỗi (ms) - 3 seconds
+
+  // Thời gian hiển thị HeartName sau khi nhập tên (ms)
+  heartNameDuration: 20000, // 20 seconds (15-20s range)
+};
+
+// Danh sách các loại pháo hoa để cycle
+const FIREWORK_EFFECTS = [
+  "Random",
+  "Crackle",
+  "Crossette",
+  "Crysanthemum",
+  "Falling Leaves",
+  "Floral",
+  "Ghost",
+  "Heart",
+  "Horse Tail",
+  "Palm",
+  "Ring",
+  "Strobe",
+  "Willow",
+] as const;
+// ========================================================
+
+type Gender = "male" | "female";
+
+interface WishCardProps {
+  wish: string;
+  index: number;
+  onAnimationComplete: () => void;
+  totalWishes: number;
+}
+
+// Component hiển thị câu chúc với icon hiệu ứng (thay bóng bay)
+const WishCard: React.FC<WishCardProps> = ({
+  wish,
+  index,
+  onAnimationComplete,
+  totalWishes,
+}) => {
+  const icons = [HeartFilled, StarFilled, SmileFilled, GiftOutlined];
+  const IconComponent = icons[index % icons.length];
+  const colors = ["#ff6b6b", "#ffd93d", "#6bcb77", "#4d96ff", "#ff6b9d"];
+  const [screenHeight, setScreenHeight] = useState(0);
+
+  useEffect(() => {
+    setScreenHeight(window.innerHeight);
+  }, []);
+
+  return (
+    <motion.div
+      className="absolute flex flex-col items-center"
+      style={{
+        left: `${15 + (index * 70) / totalWishes}%`,
+        bottom: -150,
+        willChange: "transform, opacity",
+        transform: "translateZ(0)",
+      }}
+      initial={{ y: 0, opacity: 0, scale: 0.5 }}
+      animate={{
+        y: screenHeight > 0 ? -(screenHeight + 200) : -1000,
+        opacity: [0, 1, 1, 1, 0],
+        scale: [0.5, 1, 1, 1, 0.8],
+        rotate: [0, -3, 3, -3, 0],
+      }}
+      transition={{
+        duration: TIMING_CONFIG.wishDuration,
+        delay: index * TIMING_CONFIG.wishDelayBetween,
+        ease: [0.25, 0.1, 0.25, 1], // cubic-bezier for smoother animation
+      }}
+      onAnimationComplete={() => {
+        if (index === totalWishes - 1) {
+          onAnimationComplete();
+        }
+      }}
+    >
+      {/* Icon với hiệu ứng pulse */}
+      <motion.div
+        animate={{
+          scale: [1, 1.2, 1],
+          rotate: [0, 10, -10, 0],
+        }}
+        transition={{
+          duration: 2,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+      >
+        <IconComponent
+          style={{
+            fontSize: 48,
+            color: colors[index % colors.length],
+            filter: "drop-shadow(0 0 10px rgba(255,255,255,0.5))",
+          }}
+        />
+      </motion.div>
+
+      {/* Dây nối */}
+      <motion.div
+        className="w-0.5 h-12"
+        style={{
+          background: `linear-gradient(to bottom, ${colors[index % colors.length]}, transparent)`,
+        }}
+        animate={{ scaleY: [1, 1.1, 1] }}
+        transition={{ duration: 1, repeat: Infinity }}
+      />
+
+      {/* Card câu chúc */}
+      <motion.div
+        className="px-4 py-3 rounded-xl shadow-2xl max-w-xs text-center backdrop-blur-sm"
+        style={{
+          background: `linear-gradient(135deg, ${colors[index % colors.length]}dd, ${colors[(index + 1) % colors.length]}aa)`,
+          border: "2px solid rgba(255,255,255,0.3)",
+        }}
+        whileHover={{ scale: 1.05 }}
+      >
+        <p className="text-white font-bold text-sm md:text-base drop-shadow-lg">
+          {wish}
+        </p>
+      </motion.div>
+    </motion.div>
+  );
+};
+
+// Component Lì xì
+const LuckyMoney: React.FC<{ handleOnClick: () => void }> = ({
+  handleOnClick,
+}) => {
+  const [screenHeight, setScreenHeight] = useState(0);
+
+  useEffect(() => {
+    setScreenHeight(window.innerHeight);
+  }, []);
+
+  return (
+    <motion.div
+      className="fixed flex flex-col items-center cursor-pointer z-50"
+      style={{
+        left: "50%",
+        bottom: -200,
+        x: "-50%",
+        willChange: "transform, opacity",
+        transform: "translateZ(0)",
+      }}
+      initial={{ y: 0, opacity: 0 }}
+      animate={{
+        y: screenHeight > 0 ? -(screenHeight / 2 + 100) : -500,
+        opacity: 1,
+      }}
+      transition={{
+        duration: TIMING_CONFIG.luckyMoneyDuration,
+        ease: [0.25, 0.1, 0.25, 1],
+      }}
+      whileHover={{ scale: 1.1 }}
+      whileTap={{ scale: 0.95 }}
+      onClick={handleOnClick}
+    >
+      {/* Lì xì envelope */}
+      <motion.div
+        className="relative"
+        animate={{
+          y: [0, -10, 0],
+          rotate: [-3, 3, -3],
+        }}
+        transition={{
+          duration: 2,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+      >
+        {/* Bao lì xì */}
+        <div className="relative w-32 h-44 md:w-40 md:h-56">
+          {/* Phần thân bao lì xì */}
+          <div
+            className="absolute inset-0 rounded-lg shadow-2xl"
+            style={{
+              background: "linear-gradient(135deg, #ff4d4d, #cc0000)",
+              border: "3px solid #ffd700",
+            }}
+          >
+            {/* Hoa văn trang trí */}
+            <div className="absolute inset-2 border-2 border-yellow-400/30 rounded-md" />
+
+            {/* Chữ Phúc */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <motion.div
+                className="w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center"
+                style={{
+                  background: "linear-gradient(135deg, #ffd700, #ffaa00)",
+                  boxShadow: "0 0 20px rgba(255,215,0,0.5)",
+                }}
+                animate={{
+                  boxShadow: [
+                    "0 0 20px rgba(255,215,0,0.5)",
+                    "0 0 40px rgba(255,215,0,0.8)",
+                    "0 0 20px rgba(255,215,0,0.5)",
+                  ],
+                }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+              >
+                <span className="text-red-600 font-bold text-2xl md:text-3xl"></span>
+              </motion.div>
+            </div>
+
+            {/* Nắp bao lì xì */}
+            <div
+              className="absolute top-0 left-0 right-0 h-12 md:h-14 rounded-t-lg"
+              style={{
+                background: "linear-gradient(135deg, #ff6666, #dd0000)",
+                borderBottom: "2px solid #ffd700",
+              }}
+            >
+              <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 w-6 h-6 md:w-8 md:h-8 rounded-full bg-linear-to-br from-yellow-400 to-yellow-600 border-2 border-yellow-300" />
+            </div>
+          </div>
+        </div>
+
+        {/* Sparkles xung quanh */}
+        {[...Array(6)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-2 h-2 rounded-full bg-yellow-400"
+            style={{
+              top: `${20 + Math.random() * 60}%`,
+              left: `${-10 + Math.random() * 120}%`,
+            }}
+            animate={{
+              scale: [0, 1, 0],
+              opacity: [0, 1, 0],
+            }}
+            transition={{
+              duration: 1.5,
+              repeat: Infinity,
+              delay: i * 0.3,
+            }}
+          />
+        ))}
+      </motion.div>
+
+      {/* Text Click me */}
+      <motion.div
+        className="mt-4 px-6 py-2 rounded-full font-bold text-lg md:text-xl"
+        style={{
+          background: "linear-gradient(135deg, #ffd700, #ffaa00)",
+          color: "#cc0000",
+          boxShadow: "0 4px 20px rgba(255,215,0,0.5)",
+        }}
+        animate={{
+          scale: [1, 1.1, 1],
+          boxShadow: [
+            "0 4px 20px rgba(255,215,0,0.5)",
+            "0 4px 30px rgba(255,215,0,0.8)",
+            "0 4px 20px rgba(255,215,0,0.5)",
+          ],
+        }}
+        transition={{ duration: 1, repeat: Infinity }}
+      >
+        🧧 Click Me! 🧧
+      </motion.div>
+    </motion.div>
+  );
+};
+
+const HappyNewYear = () => {
+  const [step, setStep] = useState<number>(0);
+  const [userName, setUserName] = useState<string>("");
+  const [gender, setGender] = useState<Gender>("male");
+  const [showLuckyMoney, setShowLuckyMoney] = useState(false);
+  const [showBox, setShowBox] = useState(false);
+  const [stopCycle, setStopCycle] = useState(false);
+
+  // Firework refs
   const mainCanvasRef = useRef<HTMLCanvasElement>(null);
   const trailsCanvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -15,39 +334,117 @@ const Page = () => {
     containerRef,
   );
 
-  // Get stable action references from the store
   const togglePause = useFireworkStore((state) => state.togglePause);
-  const toggleMenu = useFireworkStore((state) => state.toggleMenu);
+  const updateConfig = useFireworkStore((state) => state.updateConfig);
+  // Kiểm tra tên đặc biệt để hiển thị HeartName "LOVE"
+  const isSpecialUser = useMemo(() => {
+    return userName.toLowerCase().includes("trang");
+  }, [userName]);
+  // Get random wishes based on gender
+  const wishes = useMemo(() => {
+    if (isSpecialUser) {
+      return SPACIAL_WISHES;
+    }
+    const wishList = gender === "male" ? WISHES_MALE : WISHES_FEMALE;
+    const name = userName.trim().toUpperCase();
+    // Lấy 3-4 câu chúc ngẫu nhiên
+    return wishList
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 4)
+      .map((w) =>
+        w.replace("anh", name || "bạn").replace("chị", name || "bạn"),
+      );
+  }, [gender, userName, isSpecialUser]);
 
-  // Handle keyboard events
-  useEffect(() => {
-    const handleKeydown = (event: KeyboardEvent) => {
-      // P - toggle pause
-      if (event.keyCode === 80) {
-        togglePause();
-      }
-      // O - toggle menu
-      else if (event.keyCode === 79) {
-        toggleMenu();
-      }
-      // Esc - close menu
-      else if (event.keyCode === 27) {
-        toggleMenu(false);
-      }
-    };
+  // Lì xì link - có thể customize
+  const luckyMoneyLink = "https://example.com/lucky-money";
 
-    window.addEventListener("keydown", handleKeydown);
-    return () => window.removeEventListener("keydown", handleKeydown);
-  }, [togglePause, toggleMenu]);
-
-  // Initialize app - unpause on mount
+  // Initialize fireworks
   useEffect(() => {
     togglePause(false);
   }, [togglePause]);
 
+  // Cycle through all firework effects in 30-45s
+  useEffect(() => {
+    if (!TIMING_CONFIG.fireworkCycleEnabled || stopCycle) return;
+
+    let effectIndex = 0;
+    const startTime = Date.now();
+
+    const cycleInterval = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+
+      // Chỉ cycle trong khoảng thời gian cho phép
+      if (
+        elapsed >= TIMING_CONFIG.fireworkCycleStart &&
+        elapsed < TIMING_CONFIG.fireworkCycleEnd
+      ) {
+        const effect = FIREWORK_EFFECTS[effectIndex % FIREWORK_EFFECTS.length];
+        updateConfig({ shell: effect });
+        effectIndex++;
+      }
+
+      // Dừng cycle sau khi hết thời gian
+      if (elapsed >= TIMING_CONFIG.fireworkCycleEnd) {
+        clearInterval(cycleInterval);
+        // Quay về Random sau khi cycle xong
+        updateConfig({ shell: "Random" });
+      }
+    }, TIMING_CONFIG.fireworkChangeInterval);
+
+    return () => clearInterval(cycleInterval);
+  }, [updateConfig, stopCycle]);
+
+  // Show box after configured delay
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowBox(true);
+    }, TIMING_CONFIG.boxAppearDelay);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Handle form submit
+  const handleSubmit = () => {
+    if (userName.trim()) {
+      // Dừng cycle pháo hoa
+      setStopCycle(true);
+
+      // Đổi firework thành HeartName với tên user (chưa bật Finale Mode)
+      updateConfig({
+        shell: "HeartName",
+        customText: isSpecialUser ? "LOVE" : userName.toUpperCase(),
+        finale: false, // Chưa bật Finale Mode
+      });
+      setStep(1);
+
+      // Sau 15-20s, chuyển sang Random + bật Finale Mode
+      setTimeout(() => {
+        updateConfig({
+          shell: "Random",
+          finale: true, // Bật Finale Mode cho pháo hoa hoành tráng
+        });
+      }, TIMING_CONFIG.heartNameDuration);
+    }
+  };
+
+  // Khi wishes bay lên hết thì hiện lì xì
+  const handleWishesComplete = () => {
+    setShowLuckyMoney(true);
+  };
+
+  // Handle click on Lucky Money
+  const handleLuckyMoneyClick = async () => {
+    try {
+      // Có thể thêm hiệu ứng hoặc logic khi click vào lì xì
+      window.open(luckyMoneyLink, "_blank");
+      apiUserService.createUser(userName, gender).catch((err) => {
+        console.error("Error creating user:", err);
+      });
+    } catch (error) {}
+  };
   return (
     <main className="bg-black h-screen w-screen text-white relative overflow-hidden">
-      <Controls />
+      {/* Firework Canvas Background */}
       <div
         ref={containerRef}
         className="canvas-container absolute inset-0 w-full h-full"
@@ -66,8 +463,204 @@ const Page = () => {
           className="absolute inset-0 pointer-events-none"
         />
       </div>
+
+      {/* Step 0: Box nhập tên rơi xuống (sau 30s) */}
+      <AnimatePresence>
+        {step === 0 && showBox && (
+          <motion.div
+            className="fixed inset-0 flex items-center justify-center z-40 pointer-events-none"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="pointer-events-auto mx-4"
+              initial={{ y: -window.innerHeight, rotate: -10 }}
+              animate={{
+                y: 0,
+                rotate: 0,
+              }}
+              exit={{
+                y: window.innerHeight,
+                opacity: 0,
+                scale: 0.5,
+              }}
+              transition={{
+                type: "spring",
+                damping: 15,
+                stiffness: 100,
+                duration: 1.5,
+              }}
+            >
+              <div
+                className="p-6 md:p-8 rounded-2xl shadow-2xl max-w-md w-full backdrop-blur-md relative"
+                style={{
+                  //   background:
+                  //     "linear-gradient(135deg, rgba(220,38,38,0.6), rgba(185,28,28,0.5))",
+                  background: "transparent",
+                  border: "3px solid #ffd700",
+                  boxShadow: "0 0 40px rgba(255,215,0,0.3)",
+                }}
+              >
+                {/* Header */}
+                <motion.div
+                  className="text-center mb-6"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 1, type: "spring" }}
+                >
+                  <motion.h1
+                    className="text-3xl md:text-4xl font-bold text-yellow-400 mb-2"
+                    animate={{
+                      textShadow: [
+                        "0 0 10px #ffd700",
+                        "0 0 30px #ffd700",
+                        "0 0 10px #ffd700",
+                      ],
+                    }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  >
+                    🎊 Chúc Mừng Năm Mới 🎊
+                  </motion.h1>
+                  <p className="text-yellow-200 text-sm md:text-base">
+                    Nhập tên để nhận lời chúc đặc biệt!
+                  </p>
+                </motion.div>
+
+                {/* Form */}
+                <motion.div
+                  className="space-y-5"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 1.2 }}
+                >
+                  {/* Input tên */}
+                  <div>
+                    <label className="block text-yellow-200 mb-2 font-medium">
+                      Tên của bạn:
+                    </label>
+                    <Input
+                      size="large"
+                      placeholder="Nhập tên của bạn..."
+                      value={userName}
+                      onChange={(e) => setUserName(e.target.value)}
+                      className="bg-white/90! border-yellow-400! text-gray-800!"
+                      style={{ borderWidth: 2 }}
+                      onPressEnter={handleSubmit}
+                    />
+                  </div>
+
+                  {/* Radio giới tính */}
+                  <div>
+                    <label className="block text-yellow-200 mb-2 font-medium">
+                      Giới tính:
+                    </label>
+                    <Radio.Group
+                      value={gender}
+                      onChange={(e) => setGender(e.target.value)}
+                      className="flex gap-4"
+                    >
+                      <Radio
+                        value="male"
+                        className="text-white! [&_.ant-radio-inner]:border-yellow-400! [&_.ant-radio-checked_.ant-radio-inner]:bg-yellow-400! [&_.ant-radio-checked_.ant-radio-inner]:border-yellow-400!"
+                      >
+                        <span className="text-white">Nam 👨</span>
+                      </Radio>
+                      <Radio
+                        value="female"
+                        className="text-white! [&_.ant-radio-inner]:border-yellow-400! [&_.ant-radio-checked_.ant-radio-inner]:bg-yellow-400! [&_.ant-radio-checked_.ant-radio-inner]:border-yellow-400!"
+                      >
+                        <span className="text-white">Nữ 👩</span>
+                      </Radio>
+                    </Radio.Group>
+                  </div>
+
+                  {/* Submit button */}
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <Button
+                      type="primary"
+                      size="large"
+                      block
+                      onClick={handleSubmit}
+                      disabled={!userName.trim()}
+                      className="h-12! text-lg! font-bold! rounded-xl!"
+                      style={{
+                        background: userName.trim()
+                          ? "linear-gradient(135deg, #ffd700, #ffaa00)"
+                          : undefined,
+                        border: "none",
+                        color: userName.trim() ? "#cc0000" : undefined,
+                      }}
+                    >
+                      🎆 Nhận Lời Chúc 🎆
+                    </Button>
+                  </motion.div>
+                </motion.div>
+
+                {/* Decorations */}
+                <div className="absolute -top-4 -left-4 text-4xl">🧧</div>
+                <div className="absolute -top-4 -right-4 text-4xl">🎉</div>
+                <div className="absolute -bottom-4 -left-4 text-4xl">🎊</div>
+                <div className="absolute -bottom-4 -right-4 text-4xl">🏮</div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Step 1: Hiển thị câu chúc bay lên */}
+      <AnimatePresence>
+        {step === 1 && (
+          <motion.div
+            className="fixed inset-0 z-30 pointer-events-none overflow-hidden"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            {/* Greeting header */}
+            <motion.div
+              className="absolute top-8 left-0 right-0 text-center z-40"
+              initial={{ opacity: 0, y: -50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+            >
+              <motion.h2
+                className="text-2xl md:text-4xl font-bold text-yellow-400 drop-shadow-lg"
+                animate={{
+                  textShadow: [
+                    "0 0 10px #ffd700, 0 0 20px #ff6b6b",
+                    "0 0 20px #ffd700, 0 0 40px #ff6b6b",
+                    "0 0 10px #ffd700, 0 0 20px #ff6b6b",
+                  ],
+                }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                ✨ Gửi {userName.toUpperCase()} ✨
+              </motion.h2>
+            </motion.div>
+
+            {/* Wishes floating up */}
+            {wishes.map((wish, index) => (
+              <WishCard
+                key={index}
+                wish={wish}
+                index={index}
+                totalWishes={wishes.length}
+                onAnimationComplete={handleWishesComplete}
+              />
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Step 2: Lì xì bay lên */}
+      <AnimatePresence>
+        {showLuckyMoney && <LuckyMoney handleOnClick={handleLuckyMoneyClick} />}
+      </AnimatePresence>
     </main>
   );
 };
 
-export default Page;
+export default HappyNewYear;

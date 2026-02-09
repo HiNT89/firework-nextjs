@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
 import {
   QUALITY_HIGH,
   QUALITY_NORMAL,
@@ -97,145 +96,113 @@ export interface FireworkState {
   isFinaleMode: () => boolean;
 }
 
-export const useFireworkStore = create<FireworkState>()(
-  persist(
-    (set, get) => ({
-      // Initial app state
-      paused: false,
-      soundEnabled: false,
-      menuOpen: false,
-      openHelpTopic: null,
-      fullscreen: false,
+export const useFireworkStore = create<FireworkState>()((set, get) => ({
+  // Initial app state
+  paused: false,
+  soundEnabled: false,
+  menuOpen: false,
+  openHelpTopic: null,
+  fullscreen: false,
 
-      // Initial config
-      config: {
-        quality: String(
-          APP_CONFIG.IS_HIGH_END_DEVICE ? QUALITY_HIGH : QUALITY_NORMAL,
-        ),
-        shell: "Random" as ShellName,
-        size: getDefaultShellSize(),
-        autoLaunch: true,
-        finale: false,
-        skyLighting: String(SKY_LIGHT_NORMAL),
-        hideControls: getDefaultHideControls(),
-        longExposure: false,
-        scaleFactor: getDefaultScaleFactor(),
-        customText: "LOVE",
-      },
+  // Initial config
+  config: {
+    quality: String(
+      APP_CONFIG.IS_HIGH_END_DEVICE ? QUALITY_HIGH : QUALITY_NORMAL,
+    ),
+    shell: "Random" as ShellName,
+    size: getDefaultShellSize(),
+    autoLaunch: true,
+    finale: true,
+    skyLighting: String(SKY_LIGHT_NORMAL),
+    hideControls: getDefaultHideControls(),
+    longExposure: false,
+    scaleFactor: getDefaultScaleFactor(),
+    customText: "2026",
+  },
 
-      // Runtime quality state
-      quality: APP_CONFIG.IS_HIGH_END_DEVICE ? QUALITY_HIGH : QUALITY_NORMAL,
-      isLowQuality: false,
-      isNormalQuality: !APP_CONFIG.IS_HIGH_END_DEVICE,
-      isHighQuality: APP_CONFIG.IS_HIGH_END_DEVICE,
+  // Runtime quality state
+  quality: APP_CONFIG.IS_HIGH_END_DEVICE ? QUALITY_HIGH : QUALITY_NORMAL,
+  isLowQuality: false,
+  isNormalQuality: !APP_CONFIG.IS_HIGH_END_DEVICE,
+  isHighQuality: APP_CONFIG.IS_HIGH_END_DEVICE,
 
-      // Canvas dimensions
-      stageW: 0,
-      stageH: 0,
+  // Canvas dimensions
+  stageW: 0,
+  stageH: 0,
 
-      // Simulation
-      simSpeed: 1,
-      currentFrame: 0,
-      speedBarOpacity: 0,
-      autoLaunchTime: 0,
+  // Simulation
+  simSpeed: 1,
+  currentFrame: 0,
+  speedBarOpacity: 0,
+  autoLaunchTime: 0,
 
-      // Actions
-      togglePause: (toggle) =>
-        set((state) => ({
-          paused: toggle !== undefined ? toggle : !state.paused,
-        })),
+  // Actions
+  togglePause: (toggle) =>
+    set((state) => ({
+      paused: toggle !== undefined ? toggle : !state.paused,
+    })),
 
-      toggleSound: (toggle) =>
-        set((state) => ({
-          soundEnabled: toggle !== undefined ? toggle : !state.soundEnabled,
-        })),
+  toggleSound: (toggle) =>
+    set((state) => ({
+      soundEnabled: toggle !== undefined ? toggle : !state.soundEnabled,
+    })),
 
-      toggleMenu: (toggle) =>
-        set((state) => ({
-          menuOpen: toggle !== undefined ? toggle : !state.menuOpen,
-        })),
+  toggleMenu: (toggle) =>
+    set((state) => ({
+      menuOpen: toggle !== undefined ? toggle : !state.menuOpen,
+    })),
 
-      setFullscreen: (value) => set({ fullscreen: value }),
+  setFullscreen: (value) => set({ fullscreen: value }),
 
-      setOpenHelpTopic: (topic) => set({ openHelpTopic: topic }),
+  setOpenHelpTopic: (topic) => set({ openHelpTopic: topic }),
 
-      updateConfig: (nextConfig) =>
-        set((state) => {
-          const newConfig = { ...state.config, ...nextConfig };
-          const quality = +newConfig.quality;
-          return {
-            config: newConfig,
-            quality,
-            isLowQuality: quality === QUALITY_LOW,
-            isNormalQuality: quality === QUALITY_NORMAL,
-            isHighQuality: quality === QUALITY_HIGH,
-          };
-        }),
-
-      setSimSpeed: (speed) =>
-        set({ simSpeed: Math.min(Math.max(speed, 0), 1) }),
-
-      setSpeedBarOpacity: (opacity) =>
-        set({ speedBarOpacity: Math.max(0, opacity) }),
-
-      setAutoLaunchTime: (time) => set({ autoLaunchTime: time }),
-
-      incrementFrame: () =>
-        set((state) => ({ currentFrame: state.currentFrame + 1 })),
-
-      setStageDimensions: (w, h) => set({ stageW: w, stageH: h }),
-
-      // Selectors
-      isRunning: () => {
-        const state = get();
-        return !state.paused && !state.menuOpen;
-      },
-
-      canPlaySound: () => {
-        const state = get();
-        return state.isRunning() && state.soundEnabled;
-      },
-
-      getQuality: () => +get().config.quality,
-
-      getShellName: () => get().config.shell,
-
-      getShellSize: () => +get().config.size,
-
-      getSkyLighting: () => +get().config.skyLighting,
-
-      getScaleFactor: () => get().config.scaleFactor,
-
-      isFinaleMode: () => get().config.finale,
+  updateConfig: (nextConfig) =>
+    set((state) => {
+      const newConfig = { ...state.config, ...nextConfig };
+      const quality = +newConfig.quality;
+      return {
+        config: newConfig,
+        quality,
+        isLowQuality: quality === QUALITY_LOW,
+        isNormalQuality: quality === QUALITY_NORMAL,
+        isHighQuality: quality === QUALITY_HIGH,
+      };
     }),
-    {
-      name: "cm_fireworks_data",
-      partialize: (state) => ({
-        config: {
-          quality: state.config.quality,
-          size: state.config.size,
-          skyLighting: state.config.skyLighting,
-          scaleFactor: state.config.scaleFactor,
-          shell: state.config.shell,
-          autoLaunch: state.config.autoLaunch,
-          finale: state.config.finale,
-          hideControls: state.config.hideControls,
-          longExposure: state.config.longExposure,
-          customText: state.config.customText,
-        },
-      }),
-      merge: (persistedState, currentState) => {
-        const persisted = persistedState as Partial<FireworkState>;
-        return {
-          ...currentState,
-          config: {
-            ...currentState.config,
-            ...(persisted?.config || {}),
-          },
-        };
-      },
-    },
-  ),
-);
+
+  setSimSpeed: (speed) => set({ simSpeed: Math.min(Math.max(speed, 0), 1) }),
+
+  setSpeedBarOpacity: (opacity) =>
+    set({ speedBarOpacity: Math.max(0, opacity) }),
+
+  setAutoLaunchTime: (time) => set({ autoLaunchTime: time }),
+
+  incrementFrame: () =>
+    set((state) => ({ currentFrame: state.currentFrame + 1 })),
+
+  setStageDimensions: (w, h) => set({ stageW: w, stageH: h }),
+
+  // Selectors
+  isRunning: () => {
+    const state = get();
+    return !state.paused && !state.menuOpen;
+  },
+
+  canPlaySound: () => {
+    const state = get();
+    return state.isRunning() && state.soundEnabled;
+  },
+
+  getQuality: () => +get().config.quality,
+
+  getShellName: () => get().config.shell,
+
+  getShellSize: () => +get().config.size,
+
+  getSkyLighting: () => +get().config.skyLighting,
+
+  getScaleFactor: () => get().config.scaleFactor,
+
+  isFinaleMode: () => get().config.finale,
+}));
 
 export default useFireworkStore;

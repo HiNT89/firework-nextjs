@@ -1,12 +1,10 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "@fortawesome/fontawesome-svg-core/styles.css";
 import "./globals.css";
 
 // Extract metadata configuration for better maintainability
 const SITE_METADATA = {
-  title: "Firework Simulator - HiNT",
-  description: "This page is Firework Simulator of HiNT",
+  title: "Happy New Year 2026",
+  description: "Happy New Year 2026",
   url: "https://firework.hint.pro.vn",
   thumbnail: "/thumbnail_logo.png",
   googleVerification: "",
