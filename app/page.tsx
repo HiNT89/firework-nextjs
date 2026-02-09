@@ -338,7 +338,7 @@ const HappyNewYear = () => {
   const updateConfig = useFireworkStore((state) => state.updateConfig);
   // Kiểm tra tên đặc biệt để hiển thị HeartName "LOVE"
   const isSpecialUser = useMemo(() => {
-    return userName.toLowerCase().includes("trang");
+    return userName.toLowerCase().includes("love");
   }, [userName]);
   // Get random wishes based on gender
   const wishes = useMemo(() => {
