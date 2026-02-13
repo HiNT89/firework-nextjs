@@ -14,25 +14,57 @@ import { apiUserService } from "@/api/apiUserService";
 
 // Danh sách câu chúc Tết theo giới tính
 const WISHES_MALE = [
-  "Chúc anh năm mới thành công rực rỡ! 🎆",
-  "Chúc anh năm mới vạn sự như ý! 🧧",
-  "Chúc anh năm mới phát tài phát lộc! 💰",
-  "Chúc anh năm mới sức khỏe dồi dào! 💪",
-  "Chúc anh năm mới công thành danh toại! 🏆",
+
+
+  "🧧 Chúc anh năm 2026 sức khoẻ dồi dào 💪, tiền vào như nước 💸, mọi việc hanh thông 🚀.",
+
+  "🎉 Năm mới chúc anh sự nghiệp thăng tiến 📈, dự án thuận lợi ✅, cuộc sống nhiều niềm vui 😄.",
+
+  "🍀 Chúc anh 2026 làm đâu thắng đó 🔥, gặp nhiều may mắn ✨ và luôn giữ phong độ 😎.",
+
+  "💼 Năm mới mong anh công việc suôn sẻ 📊, thu nhập tăng đều 💰 và tinh thần luôn vững vàng 🧠.",
+
+  "🚀 Chúc anh một năm bứt phá mạnh mẽ ⚡, mục tiêu nào cũng hoàn thành 🎯.",
+
+  "😄 Năm 2026 chúc anh cười nhiều hơn 😂, stress ít lại 🧘 và thành công nhiều hơn 🏆."
+  ,
+  "🍻 Chúc anh năm mới nhiều cơ hội mới 🌟, nhiều mối quan hệ tốt 🤝 và nhiều trải nghiệm đáng nhớ 📸.",
+
+  "🔥 Chúc anh bản lĩnh hơn 💪, tự tin hơn 😎 và luôn làm chủ cuộc chơi 🎮.",
+
+  "💰 Năm mới chúc anh ví tiền luôn đầy 📈, sức khoẻ luôn tốt ❤️ và tinh thần luôn tích cực ☀️.",
+
+  "🌟 Chúc anh năm 2026 trưởng thành hơn 🧠, thành công hơn 🏆 và hạnh phúc hơn mỗi ngày 😊.",
 ];
 
 const WISHES_FEMALE = [
-  "Chúc chị năm mới xinh đẹp rạng ngời! 🌸",
-  "Chúc chị năm mới hạnh phúc viên mãn! 💖",
-  "Chúc chị năm mới may mắn an lành! 🍀",
-  "Chúc chị năm mới tươi trẻ như xuân! 🌺",
-  "Chúc chị năm mới mọi điều tốt đẹp! ✨",
+  "🌸 Chúc chị năm 2026 luôn xinh đẹp ✨, vui vẻ 😊 và gặp nhiều điều may mắn 🍀.",
+
+  "💖 Năm mới chúc chị hạnh phúc trọn vẹn 🥰, công việc suôn sẻ 📊 và tài chính dư dả 💰.",
+
+  "🎀 Chúc chị luôn toả sáng 🌟, tự tin 😌 và đạt được mọi mục tiêu 🎯.",
+
+  "🌷 Năm 2026 mong chị luôn được yêu thương 💕, bảo vệ 🤍 và sống thật vui vẻ 😄.",
+
+  "✨ Chúc chị một năm nhẹ nhàng 🕊️, bình yên 🌿 nhưng vẫn đầy thành tựu 🏆.",
+
+  "💼 Năm mới chúc chị sự nghiệp thăng tiến 📈, tinh thần tích cực ☀️ và nhiều cơ hội mới 🚪.",
+
+  "😊 Chúc chị cười thật nhiều 😄, stress thật ít 🧘 và luôn giữ năng lượng tích cực 🔋.",
+
+  "🌺 Năm 2026 mong chị luôn mạnh mẽ 💪, độc lập 🌟 và tự hào về chính mình 💖.",
+
+  "🎉 Chúc chị mỗi ngày đều là một niềm vui 🎈, mỗi tháng đều có thành tựu 🏆.",
+
+  "🍀 Năm mới chúc chị bình an ❤️, rực rỡ ✨ và hạnh phúc dài lâu 🥰.",
 ];
 
 const SPACIAL_WISHES = [
-  "Chúc LOVE một năm mới tràn đầy yêu thương và hạnh phúc! ❤️🎉",
-  "Hãy vui vẻ lên nhé, LOVE! Năm mới an khang thịnh vượng! 🥳🧧",
-  "Chúc LOVE luôn rạng rỡ và thành công trong năm mới! 🌟💖",
+  "🌿 Chúc em năm mới thật bình an, nhẹ lòng hơn sau những áp lực đã trải qua và luôn tìm thấy những khoảnh khắc khiến mình mỉm cười 🙂",
+  "✨ Mong rằng năm mới sẽ mang đến cho em nhiều niềm vui giản dị, những điều tử tế và những người thật lòng ở bên cạnh 🤍",
+  "🌸 Chúc em luôn mạnh mẽ, vững vàng và cũng đủ dịu dàng với chính mình trong mọi giai đoạn của cuộc sống 💫",
+  "🚀 Hy vọng năm mới mở ra cho em thật nhiều cơ hội mới, trải nghiệm đẹp và những kỷ niệm khiến em tự hào khi nhìn lại 🌈",
+  "🧧 Chúc em một năm mới thật hạnh phúc — dù ở đâu, làm gì, vẫn luôn cảm thấy được yêu thương và trân trọng 💖"
 ];
 
 // ==================== TIMING CONFIG ====================
@@ -357,7 +389,7 @@ const HappyNewYear = () => {
   }, [gender, userName, isSpecialUser]);
 
   // Lì xì link - có thể customize
-  const luckyMoneyLink = "https://example.com/lucky-money";
+  const luckyMoneyLink = "https://onelink.zalopay.vn/zalopay-tarot?from_source=zalopay-tarot&onelink=true&os=iOS&trace_id=624dc9ea-4ee3-45b0-ade8-97ad76c2b721&url_id=zalopay-tarot&utm_campaign=tarot&utm_content=post&utm_medium=fb&utm_source=zalopay-tarot&zlp_platform=ZPA";
 
   // Initialize fireworks
   useEffect(() => {
@@ -440,7 +472,7 @@ const HappyNewYear = () => {
       apiUserService.createUser(userName, gender).catch((err) => {
         console.error("Error creating user:", err);
       });
-    } catch (error) {}
+    } catch (error) { }
   };
   return (
     <main className="bg-black h-screen w-screen text-white relative overflow-hidden">
