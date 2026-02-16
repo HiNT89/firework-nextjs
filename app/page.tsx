@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useRef, useEffect, useMemo } from "react";
+import React, { useState, useRef, useEffect, useMemo, use } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Input, Radio, Button } from "antd";
 import {
@@ -11,11 +11,10 @@ import {
 import { useFireworkEngine } from "@/hooks/useFireworkEngine";
 import { useFireworkStore } from "@/stores/useFireworkStore";
 import { apiUserService } from "@/api/apiUserService";
+import { apiUrlService } from "@/api/apiUrlService";
 
 // Danh sách câu chúc Tết theo giới tính
 const WISHES_MALE = [
-
-
   "🧧 Chúc anh năm 2026 sức khoẻ dồi dào 💪, tiền vào như nước 💸, mọi việc hanh thông 🚀.",
 
   "🎉 Năm mới chúc anh sự nghiệp thăng tiến 📈, dự án thuận lợi ✅, cuộc sống nhiều niềm vui 😄.",
@@ -26,8 +25,7 @@ const WISHES_MALE = [
 
   "🚀 Chúc anh một năm bứt phá mạnh mẽ ⚡, mục tiêu nào cũng hoàn thành 🎯.",
 
-  "😄 Năm 2026 chúc anh cười nhiều hơn 😂, stress ít lại 🧘 và thành công nhiều hơn 🏆."
-  ,
+  "😄 Năm 2026 chúc anh cười nhiều hơn 😂, stress ít lại 🧘 và thành công nhiều hơn 🏆.",
   "🍻 Chúc anh năm mới nhiều cơ hội mới 🌟, nhiều mối quan hệ tốt 🤝 và nhiều trải nghiệm đáng nhớ 📸.",
 
   "🔥 Chúc anh bản lĩnh hơn 💪, tự tin hơn 😎 và luôn làm chủ cuộc chơi 🎮.",
@@ -64,7 +62,7 @@ const SPACIAL_WISHES = [
   "✨ Mong rằng năm mới sẽ mang đến cho em nhiều niềm vui giản dị, những điều tử tế và những người thật lòng ở bên cạnh 🤍",
   "🌸 Chúc em luôn mạnh mẽ, vững vàng và cũng đủ dịu dàng với chính mình trong mọi giai đoạn của cuộc sống 💫",
   "🚀 Hy vọng năm mới mở ra cho em thật nhiều cơ hội mới, trải nghiệm đẹp và những kỷ niệm khiến em tự hào khi nhìn lại 🌈",
-  "🧧 Chúc em một năm mới thật hạnh phúc — dù ở đâu, làm gì, vẫn luôn cảm thấy được yêu thương và trân trọng 💖"
+  "🧧 Chúc em một năm mới thật hạnh phúc — dù ở đâu, làm gì, vẫn luôn cảm thấy được yêu thương và trân trọng 💖",
 ];
 
 // ==================== TIMING CONFIG ====================
@@ -348,12 +346,15 @@ const LuckyMoney: React.FC<{ handleOnClick: () => void }> = ({
 };
 
 const HappyNewYear = () => {
+  // state
   const [step, setStep] = useState<number>(0);
   const [userName, setUserName] = useState<string>("");
   const [gender, setGender] = useState<Gender>("male");
   const [showLuckyMoney, setShowLuckyMoney] = useState(false);
   const [showBox, setShowBox] = useState(false);
   const [stopCycle, setStopCycle] = useState(false);
+  const [luckyMoneyLink, setLuckyMoneyLink] = useState<string>(""); // State để lưu URL từ API
+  console.log("luckyMoneyLink => ", luckyMoneyLink);
 
   // Firework refs
   const mainCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -370,7 +371,10 @@ const HappyNewYear = () => {
   const updateConfig = useFireworkStore((state) => state.updateConfig);
   // Kiểm tra tên đặc biệt để hiển thị HeartName "LOVE"
   const isSpecialUser = useMemo(() => {
-    return userName.toLowerCase().includes("love");
+    return (
+      userName.toLowerCase().includes("trang") ||
+      userName.toLowerCase().includes("nttrg")
+    );
   }, [userName]);
   // Get random wishes based on gender
   const wishes = useMemo(() => {
@@ -387,9 +391,6 @@ const HappyNewYear = () => {
         w.replace("anh", name || "bạn").replace("chị", name || "bạn"),
       );
   }, [gender, userName, isSpecialUser]);
-
-  // Lì xì link - có thể customize
-  const luckyMoneyLink = "https://onelink.zalopay.vn/zalopay-tarot?from_source=zalopay-tarot&onelink=true&os=iOS&trace_id=624dc9ea-4ee3-45b0-ade8-97ad76c2b721&url_id=zalopay-tarot&utm_campaign=tarot&utm_content=post&utm_medium=fb&utm_source=zalopay-tarot&zlp_platform=ZPA";
 
   // Initialize fireworks
   useEffect(() => {
@@ -435,6 +436,14 @@ const HappyNewYear = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  //
+  useEffect(() => {
+    if (luckyMoneyLink) return; // Nếu đã có link thì không gọi API nữa
+    apiUrlService.getUrl().then((url) => {
+      if (Array.isArray(url) && url.length > 0) setLuckyMoneyLink(url[0].url);
+    });
+  }, []);
+
   // Handle form submit
   const handleSubmit = () => {
     if (userName.trim()) {
@@ -472,7 +481,7 @@ const HappyNewYear = () => {
       apiUserService.createUser(userName, gender).catch((err) => {
         console.error("Error creating user:", err);
       });
-    } catch (error) { }
+    } catch (error) {}
   };
   return (
     <main className="bg-black h-screen w-screen text-white relative overflow-hidden">
